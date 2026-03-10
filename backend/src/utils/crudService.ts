@@ -123,6 +123,14 @@ export class CrudService<T extends BaseEntity> {
     this.data = [];
     this.idCounter = 1;
   }
+
+  /**
+   * 获取实体名称
+   * @returns 实体名称
+   */
+  getEntityName(): string {
+    return this.entityName;
+  }
 }
 
 /**
@@ -133,6 +141,8 @@ export class CrudService<T extends BaseEntity> {
  * @returns 路由处理器对象
  */
 export function createCrudHandlers<T extends BaseEntity>(service: CrudService<T>) {
+  const entityName = service.getEntityName();
+  
   return {
     /**
      * 获取所有实体
@@ -145,14 +155,14 @@ export function createCrudHandlers<T extends BaseEntity>(service: CrudService<T>
      * 获取单个实体
      */
     getById: (req: Request, res: Response) => {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid ID format' });
       }
 
       const entity = service.getById(id);
       if (!entity) {
-        return res.status(404).json({ error: `${service.entityName} not found` });
+        return res.status(404).json({ error: `${entityName} not found` });
       }
       res.json(entity);
     },
@@ -173,14 +183,14 @@ export function createCrudHandlers<T extends BaseEntity>(service: CrudService<T>
      * 更新实体
      */
     update: (req: Request, res: Response) => {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid ID format' });
       }
 
       const entity = service.update(id, req.body);
       if (!entity) {
-        return res.status(404).json({ error: `${service.entityName} not found` });
+        return res.status(404).json({ error: `${entityName} not found` });
       }
       res.json(entity);
     },
@@ -189,14 +199,14 @@ export function createCrudHandlers<T extends BaseEntity>(service: CrudService<T>
      * 删除实体
      */
     delete: (req: Request, res: Response) => {
-      const id = parseInt(req.params.id, 10);
+      const id = parseInt(req.params.id as string, 10);
       if (isNaN(id)) {
         return res.status(400).json({ error: 'Invalid ID format' });
       }
 
       const success = service.delete(id);
       if (!success) {
-        return res.status(404).json({ error: `${service.entityName} not found` });
+        return res.status(404).json({ error: `${entityName} not found` });
       }
       res.json({ success: true });
     },
