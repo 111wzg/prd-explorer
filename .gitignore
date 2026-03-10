@@ -45,6 +45,7 @@ docker-compose.override.yml
 
 # Test coverage
 coverage/
+.vitest/
 
 # Temporary files
 temp/
