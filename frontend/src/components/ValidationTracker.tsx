@@ -88,7 +88,7 @@ export const ValidationTracker: React.FC<ValidationTrackerProps> = ({
       dataIndex: 'result',
       key: 'result',
       ellipsis: true,
-      render: (result?: string, record: Validation) => {
+      render: (result: string | undefined, record: Validation) => {
         if (showActions && record.status !== 'pending') {
           return (
             <Select
