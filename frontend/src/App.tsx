@@ -99,7 +99,7 @@ const App: React.FC = () => {
   // 当前激活的标签页
   const [activeTab, setActiveTab] = useState<string>('overview');
   // PRD 文档内容
-  const [prdContent, setPrdContent] = useState<string>(DEFAULT_PRD_CONTENT);
+  const [prdContent] = useState<string>(DEFAULT_PRD_CONTENT);
   // 是否已初始化示例数据
   const [initialized, setInitialized] = useState<boolean>(false);
 

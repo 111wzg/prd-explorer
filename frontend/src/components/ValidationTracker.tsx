@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Card, Table, Tag, Space, Button, Select, type TableProps } from 'antd';
+import { Card, Table, Tag, Space, Button, Select } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { useAppStore } from '../stores/appStore';
 import type { Validation } from '../types';
 import {
@@ -21,19 +22,12 @@ interface ValidationTrackerProps {
   /** 是否显示操作列，默认 true */
   showActions?: boolean;
   /** 是否启用分页，默认 false（数据>10 条时自动启用） */
-  pagination?: boolean | undefined;
+  pagination?: boolean;
 }
 
 /**
  * 验证项追踪组件
  * @description 以表格形式展示验证项列表，支持状态和结果更新
- * @param props - 组件属性
- * @returns React 组件
- *
- * @example
- * ```tsx
- * <ValidationTracker showActions={true} />
- * ```
  */
 export const ValidationTracker: React.FC<ValidationTrackerProps> = ({
   showActions = true,
@@ -43,8 +37,6 @@ export const ValidationTracker: React.FC<ValidationTrackerProps> = ({
 
   /**
    * 处理状态变更
-   * @param id - 验证项 ID
-   * @param status - 新状态
    */
   const handleStatusChange = (id: string, status: Validation['status']) => {
     updateValidation(id, { status });
@@ -52,15 +44,13 @@ export const ValidationTracker: React.FC<ValidationTrackerProps> = ({
 
   /**
    * 处理结果变更
-   * @param id - 验证项 ID
-   * @param result - 验证结果
    */
   const handleResultChange = (id: string, result: string) => {
     updateValidation(id, { result });
   };
 
   // 定义表格列配置
-  const columns: TableProps<Validation>['columns'] = [
+  const columns: ColumnsType<Validation> = [
     {
       title: '验证项',
       dataIndex: 'item',
@@ -118,56 +108,56 @@ export const ValidationTracker: React.FC<ValidationTrackerProps> = ({
         return result || '-';
       },
     },
-    ...(showActions
-      ? [
-          {
-            title: '操作',
-            key: 'action',
-            render: (_: unknown, record: Validation) => (
-              <Space direction="vertical" size="small">
-                {record.status === 'pending' && (
-                  <Button
-                    size="small"
-                    type="link"
-                    onClick={() => handleStatusChange(record.id, 'in_progress')}
-                  >
-                    开始验证
-                  </Button>
-                )}
-                {record.status === 'in_progress' && (
-                  <>
-                    <Button
-                      size="small"
-                      type="link"
-                      onClick={() => handleStatusChange(record.id, 'completed')}
-                    >
-                      完成
-                    </Button>
-                    <Button
-                      size="small"
-                      type="link"
-                      danger
-                      onClick={() => handleStatusChange(record.id, 'failed')}
-                    >
-                      失败
-                    </Button>
-                  </>
-                )}
-                {record.status === 'completed' && (
-                  <Button
-                    size="small"
-                    type="link"
-                    onClick={() => handleStatusChange(record.id, 'pending')}
-                  >
-                    重置
-                  </Button>
-                )}
-              </Space>
-            ),
-          } as TableProps<Validation>['columns'][number],
-        ]
-      : []),
   ];
+
+  // 添加操作列
+  if (showActions) {
+    columns.push({
+      title: '操作',
+      key: 'action',
+      render: (_: unknown, record: Validation) => (
+        <Space direction="vertical" size="small">
+          {record.status === 'pending' && (
+            <Button
+              size="small"
+              type="link"
+              onClick={() => handleStatusChange(record.id, 'in_progress')}
+            >
+              开始验证
+            </Button>
+          )}
+          {record.status === 'in_progress' && (
+            <>
+              <Button
+                size="small"
+                type="link"
+                onClick={() => handleStatusChange(record.id, 'completed')}
+              >
+                完成
+              </Button>
+              <Button
+                size="small"
+                type="link"
+                danger
+                onClick={() => handleStatusChange(record.id, 'failed')}
+              >
+                失败
+              </Button>
+            </>
+          )}
+          {record.status === 'completed' && (
+            <Button
+              size="small"
+              type="link"
+              onClick={() => handleStatusChange(record.id, 'pending')}
+            >
+              重置
+            </Button>
+          )}
+        </Space>
+      ),
+    });
+  }
 
   // 动态分页：数据超过 10 条时启用
   const enablePagination = pagination || validations.length > 10;

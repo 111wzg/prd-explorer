@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Card, Table, Tag, Space, Button, type TableProps } from 'antd';
+import { Card, Table, Tag, Space, Button } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { useAppStore } from '../stores/appStore';
 import type { Issue } from '../types';
 import {
@@ -19,19 +20,12 @@ interface IssueListProps {
   /** 是否显示操作列，默认 true */
   showActions?: boolean;
   /** 是否启用分页，默认 false（数据>10 条时自动启用） */
-  pagination?: boolean | undefined;
+  pagination?: boolean;
 }
 
 /**
  * 问题清单组件
  * @description 以表格形式展示问题列表，支持标记为已解答
- * @param props - 组件属性
- * @returns React 组件
- *
- * @example
- * ```tsx
- * <IssueList showActions={true} />
- * ```
  */
 export const IssueList: React.FC<IssueListProps> = ({
   showActions = true,
@@ -40,7 +34,7 @@ export const IssueList: React.FC<IssueListProps> = ({
   const { issues, updateIssue } = useAppStore();
 
   // 定义表格列配置
-  const columns: TableProps<Issue>['columns'] = [
+  const columns: ColumnsType<Issue> = [
     {
       title: '问题',
       dataIndex: 'question',
@@ -73,33 +67,33 @@ export const IssueList: React.FC<IssueListProps> = ({
       ellipsis: true,
       render: (answer?: string) => answer || '-',
     },
-    ...(showActions
-      ? [
-          {
-            title: '操作',
-            key: 'action',
-            render: (_: unknown, record: Issue) => (
-              <Space size="small">
-                {record.status === 'open' && (
-                  <Button
-                    size="small"
-                    type="link"
-                    onClick={() =>
-                      updateIssue(record.id, {
-                        status: 'answered',
-                        answer: '已解答',
-                      })
-                    }
-                  >
-                    标记为已解答
-                  </Button>
-                )}
-              </Space>
-            ),
-          } as TableProps<Issue>['columns'][number],
-        ]
-      : []),
   ];
+
+  // 添加操作列
+  if (showActions) {
+    columns.push({
+      title: '操作',
+      key: 'action',
+      render: (_: unknown, record: Issue) => (
+        <Space size="small">
+          {record.status === 'open' && (
+            <Button
+              size="small"
+              type="link"
+              onClick={() =>
+                updateIssue(record.id, {
+                  status: 'answered',
+                  answer: '已解答',
+                })
+              }
+            >
+              标记为已解答
+            </Button>
+          )}
+        </Space>
+      ),
+    });
+  }
 
   // 动态分页：数据超过 10 条时启用
   const enablePagination = pagination || issues.length > 10;
