@@ -4,7 +4,8 @@
  */
 
 import React from 'react';
-import { Card, Table, Tag, Space, Button, type TableProps } from 'antd';
+import { Card, Table, Tag, Space, Button } from 'antd';
+import type { ColumnsType } from 'antd/es/table';
 import { useAppStore } from '../stores/appStore';
 import type { Task } from '../types';
 import {
@@ -19,19 +20,12 @@ interface TaskBoardProps {
   /** 是否显示操作列，默认 true */
   showActions?: boolean;
   /** 是否启用分页，默认 false（数据>10 条时自动启用） */
-  pagination?: boolean | undefined;
+  pagination?: boolean;
 }
 
 /**
  * 任务看板组件
  * @description 以表格形式展示任务列表，支持快速完成操作
- * @param props - 组件属性
- * @returns React 组件
- *
- * @example
- * ```tsx
- * <TaskBoard showActions={true} />
- * ```
  */
 export const TaskBoard: React.FC<TaskBoardProps> = ({
   showActions = true,
@@ -40,7 +34,7 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
   const { tasks, updateTask } = useAppStore();
 
   // 定义表格列配置
-  const columns: TableProps<Task>['columns'] = [
+  const columns: ColumnsType<Task> = [
     {
       title: '任务',
       dataIndex: 'title',
@@ -77,30 +71,30 @@ export const TaskBoard: React.FC<TaskBoardProps> = ({
         return <Tag color={config.color}>{config.text}</Tag>;
       },
     },
-    ...(showActions
-      ? [
-          {
-            title: '操作',
-            key: 'action',
-            render: (_: unknown, record: Task) => (
-              <Space size="small">
-                {record.status !== 'completed' && (
-                  <Button
-                    size="small"
-                    type="link"
-                    onClick={() =>
-                      updateTask(record.id, { status: 'completed' })
-                    }
-                  >
-                    完成
-                  </Button>
-                )}
-              </Space>
-            ),
-          } as TableProps<Task>['columns'][number],
-        ]
-      : []),
   ];
+
+  // 添加操作列
+  if (showActions) {
+    columns.push({
+      title: '操作',
+      key: 'action',
+      render: (_: unknown, record: Task) => (
+        <Space size="small">
+          {record.status !== 'completed' && (
+            <Button
+              size="small"
+              type="link"
+              onClick={() =>
+                updateTask(record.id, { status: 'completed' })
+              }
+            >
+              完成
+            </Button>
+          )}
+        </Space>
+      ),
+    });
+  }
 
   // 动态分页：数据超过 10 条时启用
   const enablePagination = pagination || tasks.length > 10;

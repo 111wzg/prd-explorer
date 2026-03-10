@@ -16,6 +16,7 @@ import {
 import { PrdViewer } from './components/PrdViewer';
 import { TaskBoard } from './components/TaskBoard';
 import { IssueList } from './components/IssueList';
+import { ValidationTracker } from './components/ValidationTracker';
 import { useAppStore } from './stores/appStore';
 
 const { Header, Content } = Layout;
@@ -33,6 +34,7 @@ const menuItems: MenuItem[] = [
   { key: 'overview', label: '总览' },
   { key: 'tasks', label: '任务' },
   { key: 'issues', label: '问题' },
+  { key: 'validations', label: '验证' },
 ];
 
 /**
@@ -97,7 +99,7 @@ const App: React.FC = () => {
   // 当前激活的标签页
   const [activeTab, setActiveTab] = useState<string>('overview');
   // PRD 文档内容
-  const [prdContent, setPrdContent] = useState<string>(DEFAULT_PRD_CONTENT);
+  const [prdContent] = useState<string>(DEFAULT_PRD_CONTENT);
   // 是否已初始化示例数据
   const [initialized, setInitialized] = useState<boolean>(false);
 
@@ -106,7 +108,7 @@ const App: React.FC = () => {
 
   /**
    * 初始化示例数据
-   * @description 从 PRD 中提取初始任务和问题，仅执行一次
+   * @description 从 PRD 中提取初始任务、问题和验证项，仅执行一次
    */
   useEffect(() => {
     if (initialized) return;
@@ -157,9 +159,34 @@ const App: React.FC = () => {
       },
     ];
 
+    // 添加初始验证项（来自 PRD 的关键假设）
+    const initialValidations = [
+      {
+        item: '用户有某需求',
+        method: '用户访谈',
+        status: 'pending' as const,
+        priority: 'P0' as const,
+      },
+      {
+        item: '技术可实现',
+        method: '技术预研',
+        status: 'pending' as const,
+        priority: 'P0' as const,
+      },
+      {
+        item: '商业模式可行',
+        method: '市场调研',
+        status: 'pending' as const,
+        priority: 'P1' as const,
+      },
+    ];
+
     // 批量添加
     initialTasks.forEach((task) => addTask(task));
     initialIssues.forEach((issue) => addIssue(issue));
+    initialValidations.forEach((validation) =>
+      useAppStore.getState().addValidation(validation)
+    );
 
     setInitialized(true);
   }, [addTask, addIssue, initialized]);
@@ -208,6 +235,8 @@ const App: React.FC = () => {
         return <TaskBoard />;
       case 'issues':
         return <IssueList />;
+      case 'validations':
+        return <ValidationTracker />;
       case 'overview':
       default:
         return (
@@ -215,6 +244,7 @@ const App: React.FC = () => {
             <PrdViewer content={prdContent} />
             <TaskBoard />
             <IssueList />
+            <ValidationTracker />
           </>
         );
     }

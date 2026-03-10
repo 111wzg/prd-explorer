@@ -8,6 +8,7 @@ import cors from 'cors';
 import { prdRoutes } from './routes/prd';
 import { tasksRoutes } from './routes/tasks';
 import { issuesRoutes } from './routes/issues';
+import { validationsRoutes } from './routes/validations';
 
 // ========== 配置 ==========
 
@@ -47,6 +48,7 @@ app.use(express.json());
 app.use('/api/prd', prdRoutes);
 app.use('/api/tasks', tasksRoutes);
 app.use('/api/issues', issuesRoutes);
+app.use('/api/validations', validationsRoutes);
 
 /**
  * 健康检查接口
